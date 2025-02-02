@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 500px;
+            height: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #6a0dad;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-message {
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+            margin: 5px auto;
+        }
+        .bot-message {
+            background: #dcf8c6;
+            align-self: flex-start;
+        }
+        .user-message {
+            background: #6a0dad;
+            color: white;
+            align-self: flex-end;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background: #fff;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .chat-input button {
+            background: #6a0dad;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">🤖 Psychiatrist Bot</div>
+        <div class="chat-body" id="chat-body">
+            <div class="chat-message bot-message">Welcome! How are you feeling today?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Enter your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            let inputField = document.getElementById("user-input");
+            let userMessage = inputField.value.trim();
+            if (userMessage === "") return;
+
+            let chatBody = document.getElementById("chat-body");
+
+            let userMsgElement = document.createElement("div");
+            userMsgElement.className = "chat-message user-message";
+            userMsgElement.innerText = userMessage;
+            chatBody.appendChild(userMsgElement);
+
+            fetch("/get_response", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userMessage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let botMsgElement = document.createElement("div");
+                botMsgElement.className = "chat-message bot-message";
+                botMsgElement.innerText = data.response;
+                chatBody.appendChild(botMsgElement);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            })
+            .catch(error => console.error("Error:", error));
+
+            inputField.value = "";
+        }
+    </script>
+
+</body>
+</html>
